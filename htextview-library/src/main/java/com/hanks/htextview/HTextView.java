@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.hanks.htextview.animatetext.AnvilText;
+import com.hanks.htextview.animatetext.BurnText;
 import com.hanks.htextview.animatetext.EvaporateText;
 import com.hanks.htextview.animatetext.FallText;
 import com.hanks.htextview.animatetext.IHText;
@@ -68,6 +69,9 @@ public class HTextView extends TextView {
             case 6:
                 mIHText = new PixelateText();
                 break;
+            case 7:
+                mIHText = new BurnText();
+                break;
 //            <enum name="scale" value="0"/>
 //            <enum name="evaporate" value="1"/>
 //            <enum name="fall" value="2"/>
@@ -121,6 +125,9 @@ public class HTextView extends TextView {
                 break;
             case LINE:
                 mIHText = new LineText();
+                break;
+            case BURN:
+                mIHText = new BurnText();
                 break;
         }
 

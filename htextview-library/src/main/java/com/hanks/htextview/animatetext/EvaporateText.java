@@ -1,36 +1,53 @@
 package com.hanks.htextview.animatetext;
+
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.hanks.htextview.util.CharacterUtils;
+
 /**
  * 蒸发效果
  * Created by hanks on 15-12-14.
  */
 public class EvaporateText extends HText {
 
-    float charTime  = 300; // 每个字符动画时间 500ms
-    int   mostCount = 20; // 最多10个字符同时动画
-    private int   mTextHeight;
+    /**
+     * 知识点：
+     */
+
+    float charTime = 3000; // 每个字符动画时间 500ms
+    int mostCount = 20; // 最多10个字符同时动画
+    private int mTextHeight;
     private float progress;
 
-    @Override protected void initVariables() {
+    private static final String TAG = "EvaporateText";
+
+    @Override
+    protected void initVariables() {
 
     }
 
-    @Override protected void animateStart(CharSequence text) {
+    @Override
+    protected void animateStart(CharSequence text) {
         int n = mText.length();
         n = n <= 0 ? 1 : n;
 
-        // 计算动画总时间
+        // 计算动画总时间???
+        /**
+         * TODO the way of getting duration value.
+         */
         long duration = (long) (charTime + charTime / mostCount * (n - 1));
+
+        Log.e(TAG, "chartime" + charTime + "n" + n + "duration" + duration);
 
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, duration).setDuration(duration);
         valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override public void onAnimationUpdate(ValueAnimator animation) {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
                 progress = (float) animation.getAnimatedValue();
                 mHTextView.invalidate();
             }
@@ -38,18 +55,21 @@ public class EvaporateText extends HText {
         valueAnimator.start();
     }
 
-    @Override protected void animatePrepare(CharSequence text) {
+    @Override
+    protected void animatePrepare(CharSequence text) {
 
         Rect bounds = new Rect();
         mPaint.getTextBounds(mText.toString(), 0, mText.length(), bounds);
         mTextHeight = bounds.height();
     }
 
-    @Override protected void drawFrame(Canvas canvas) {
+    @Override
+    protected void drawFrame(Canvas canvas) {
 
     }
 
-    @Override public void onDraw(Canvas canvas) {
+    @Override
+    public void onDraw(Canvas canvas) {
         float offset = startX;
         float oldOffset = oldStartX;
 
@@ -64,6 +84,19 @@ public class EvaporateText extends HText {
 
                 mOldPaint.setTextSize(mTextSize);
                 int move = CharacterUtils.needMove(i, differentList);
+                //same with AnvilText
+//                if (move != -1) {
+//                    mOldPaint.setAlpha(255);
+//                    float p = percent * 2f;
+//                    p = p > 1 ? 1 : p;
+//                    float distX = CharacterUtils.getOffset(i, move, p, startX, oldStartX, gaps, oldGaps);
+//                    canvas.drawText(mOldText.charAt(i) + "", 0, 1, distX, startY, mOldPaint);
+//                } else {
+//                    float p = percent * 2f;
+//                    p = p > 1 ? 1 : p;
+//                    mOldPaint.setAlpha((int) ((1 - p) * 255));
+//                    canvas.drawText(mOldText.charAt(i) + "", 0, 1, oldOffset, startY, mOldPaint);
+//                }
                 if (move != -1) {
                     mOldPaint.setAlpha(255);
                     float p = pp * 2f;

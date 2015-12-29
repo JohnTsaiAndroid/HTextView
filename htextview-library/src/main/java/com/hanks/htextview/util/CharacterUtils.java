@@ -17,6 +17,14 @@ public class CharacterUtils {
      * @param oldText 原来的字符串
      * @param newText 新出现的字符串
      * @return 保留的字符, 以及移动的位置
+     *
+     * eg:
+     *  old:eeee
+     *  new:eaeaeaea
+     *  => [e,0,0]
+     *     [e,1,2]
+     *     [e,2,4]
+     *     [e,3,6]
      */
     public static List<CharacterDiffResult> diff(CharSequence oldText, CharSequence newText) {
 

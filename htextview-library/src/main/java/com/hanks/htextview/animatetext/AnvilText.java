@@ -1,4 +1,5 @@
 package com.hanks.htextview.animatetext;
+
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,26 +7,39 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.animation.BounceInterpolator;
 
 import com.hanks.htextview.R;
 import com.hanks.htextview.util.CharacterUtils;
 
 import java.lang.reflect.Field;
+
 /**
  * keynote 轰然坠落效果
  * Created by hanks on 15-12-14.
  */
 public class AnvilText extends HText {
 
+    /**
+     * 知识点:
+     * 1.自定义View画图主要是用Paint类在Canvas上画的
+     * 2.Field通过变量名反射拿到值
+     * 3.Paint的setAlpha[0,255]数值越小越透明
+     * 4.类似小弹球自由落体的效果的插值器BounceInterpolator
+     */
+
     private Paint bitmapPaint;
     private Bitmap[] smokes = new Bitmap[50];
-    private float ANIMA_DURATION = 800; // 每个字符动画时间 500ms
-    private int   mTextHeight    = 0;
-    private int   mTextWidth;
+    private float ANIMA_DURATION = 8000; // 每个字符动画时间 500ms
+    private int mTextHeight = 0;
+    private int mTextWidth;
     private float progress;
 
-    @Override protected void initVariables() {
+    private static final String TAG = "AnvilText";
+
+    @Override
+    protected void initVariables() {
 
         bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bitmapPaint.setColor(Color.WHITE);
@@ -49,11 +63,19 @@ public class AnvilText extends HText {
         }
     }
 
-    @Override protected void animateStart(CharSequence text) {
+    /**
+     * dstHeight/dstWidth = smoke.getHeight/smoke.getWidth
+     *
+     * @param text
+     */
+
+    @Override
+    protected void animateStart(CharSequence text) {
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1)
                 .setDuration((long) ANIMA_DURATION);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override public void onAnimationUpdate(ValueAnimator animation) {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
                 progress = (float) animation.getAnimatedValue();
                 mHTextView.invalidate();
             }
@@ -70,7 +92,8 @@ public class AnvilText extends HText {
         System.gc();
     }
 
-    @Override protected void animatePrepare(CharSequence text) {
+    @Override
+    protected void animatePrepare(CharSequence text) {
 
         Rect bounds = new Rect();
         mPaint.getTextBounds(mText.toString(), 0, mText.length(), bounds);
@@ -78,19 +101,34 @@ public class AnvilText extends HText {
         mTextWidth = bounds.width();
     }
 
-    @Override protected void drawFrame(Canvas canvas) {
+
+    /**
+     *
+     * 当ValueAnimator实例的addUpdateListener借口每次动画更新时
+     * 会调用onDraw方法重绘界面
+     * 最终会调用drawFraw方法
+     * drawFraw方法实现了:
+     * 1.draw old text(判断old text是否需要移动)
+     * 2.draw new text(判断new text是否需要留在原地)
+     * 3.show smoke
+     * 三个功能
+     * @param canvas
+     */
+    @Override
+    protected void drawFrame(Canvas canvas) {
         float offset = startX;
         float oldOffset = oldStartX;
 
         int maxLength = Math.max(mText.length(), mOldText.length());
 
         float percent = progress; // 动画进行的百分比 0~1
+        Log.d(TAG, "percent:" + percent);
         boolean showSmoke = false;
         for (int i = 0; i < maxLength; i++) {
 
             // draw old text
             if (i < mOldText.length()) {
-
+                Log.d(TAG,"text:"+mOldText.charAt(i));
                 mOldPaint.setTextSize(mTextSize);
                 int move = CharacterUtils.needMove(i, differentList);
                 if (move != -1) {
@@ -115,6 +153,7 @@ public class AnvilText extends HText {
                 if (!CharacterUtils.stayHere(i, differentList)) {
 
                     showSmoke = true;
+                    //类似小弹球落地效果的插值器
                     float interpolation = new BounceInterpolator().getInterpolation(percent);
 
                     mPaint.setAlpha(255);
@@ -138,7 +177,6 @@ public class AnvilText extends HText {
     }
 
     /**
-     *
      * @param canvas 画布
      * @param x      中心点x坐标
      * @param y      中心点Y坐标
